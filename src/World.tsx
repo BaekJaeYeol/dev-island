@@ -3,7 +3,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, Html, Float } from "@react-three/drei";
 import { Vector3 } from "three";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
-import { cameraForBuilding, HOME_CAMERA } from "./world-config.mjs";
+import { cameraForBuilding, HOME_CAMERA, isSelectionGesture } from "./world-config.mjs";
 import { places, type Place } from "./places.mjs";
 function Unavailable({ onUnavailable }: { onUnavailable: () => void }) {
   useEffect(onUnavailable, [onUnavailable]);
@@ -31,7 +31,7 @@ function Building({
       scale={hover ? 1.08 : 1}
       onClick={(e) => {
         e.stopPropagation();
-        select(p.id);
+        if(isSelectionGesture(e.delta))select(p.id);
       }}
       onPointerOver={(e) => {
         e.stopPropagation();
@@ -201,13 +201,16 @@ export default function World({
   reducedMotion: boolean;
   onUnavailable: () => void;
 }) {
+  const cleanup=useRef<()=>void>(()=>{});
+  useEffect(()=>()=>cleanup.current(),[]);
   return (
     <Canvas
       fallback={<Unavailable onUnavailable={onUnavailable} />}
       onCreated={({ gl }) => {
-        gl.domElement.addEventListener("webglcontextlost", onUnavailable, {
-          once: true,
-        });
+        const canvas=gl.domElement;
+        const lost=(event:Event)=>{event.preventDefault();onUnavailable()};
+        canvas.addEventListener('webglcontextlost',lost);
+        cleanup.current=()=>canvas.removeEventListener('webglcontextlost',lost);
       }}
       shadows
       gl={{ alpha: true, antialias: true }}

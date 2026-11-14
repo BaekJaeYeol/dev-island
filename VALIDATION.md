@@ -1,3 +1,18 @@
+# 후속 검증 — 배포 제외
+
+- 드래그 뒤 의도치 않은 건물 선택을 pointer delta 기준으로 차단. 단위 검사 포함 Node 테스트 6개 통과.
+- WebGL2 미지원 재시도는 큰 3D 번들을 요청하기 전에 안내. 2D에서도 야간 테마 사용 가능.
+- 모션 줄이기 설정 change listener, context loss listener cleanup 보완. 실제 GPU context loss 및 OS 설정 실시간 변경은 미검증.
+- 상세 창 여백 클릭 시 닫히던 문제를 실제 backdrop 경계 좌표 검사로 수정.
+- TypeScript/Vite 빌드 통과.
+- 브라우저에서 2D 야간 테마·즉시 오류 안내·상세 열기·창 내부 여백 클릭 유지·바깥 클릭 닫기·실행 버튼 포커스 복귀 확인.
+- docs/screenshots/accessibility-verified.jpg는 실제 2D 야간 화면.
+- GPU 렌더링·실제 OrbitControls 드래그 후 선택 억제는 별도 기기에서 확인 필요.
+- 운영 배포·GitHub Actions 실행 없음.
+
+---
+아래는 앞 단계 검증 기록입니다.
+
 # Dev Island 검증 기록 — 2026-11-14
 
 ## 현재 구현

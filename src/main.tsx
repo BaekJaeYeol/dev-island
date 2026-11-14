@@ -27,24 +27,16 @@ class ErrorBoundary extends React.Component<
     return this.state.failed ? null : this.props.children;
   }
 }
+function supports3D(){try{return !!document.createElement('canvas').getContext('webgl2')}catch{return false}}
 function App() {
   const [selected, setSelected] = useState<string | null>(null);
   const [reset, setReset] = useState(0);
   const [night, setNight] = useState(false);
   const [unavailable, setUnavailable] = useState(false);
-  const [mode, setMode] = useState<"3d" | "2d">(() => {
-    try {
-      return document.createElement("canvas").getContext("webgl2")
-        ? "3d"
-        : "2d";
-    } catch {
-      return "2d";
-    }
-  });
-  const dialog = useRef<HTMLDialogElement>(null);
-  const [reducedMotion] = useState(
-    () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-  );
+  const [mode,setMode]=useState<'3d'|'2d'>(()=>supports3D()?'3d':'2d');
+  const dialog=useRef<HTMLDialogElement>(null);
+  const [reducedMotion,setReducedMotion]=useState(()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  useEffect(()=>{const media=window.matchMedia('(prefers-reduced-motion: reduce)');const change=()=>setReducedMotion(media.matches);media.addEventListener('change',change);return()=>media.removeEventListener('change',change)},[]);
   const onUnavailable = useCallback(() => {
     setUnavailable(true);
     setMode("2d");
@@ -107,6 +99,7 @@ function App() {
           <button
             className="secondary"
             onClick={() => {
+              if(mode==='2d'&&!supports3D()){onUnavailable();return;}
               setUnavailable(false);
               setMode(mode === "3d" ? "2d" : "3d");
             }}
@@ -173,7 +166,6 @@ function App() {
             </div>
             <div className="world-actions">
               <button
-                disabled={mode === "2d"}
                 aria-pressed={night}
                 onClick={() => setNight((v) => !v)}
               >
@@ -208,7 +200,9 @@ function App() {
         onCancel={() => setSelected(null)}
         onClose={() => setSelected(null)}
         onClick={(e) => {
-          if (e.target === e.currentTarget) setSelected(null);
+          if(e.target!==e.currentTarget)return;
+          const bounds=e.currentTarget.getBoundingClientRect();
+          if(e.clientX<bounds.left||e.clientX>bounds.right||e.clientY<bounds.top||e.clientY>bounds.bottom)setSelected(null);
         }}
       >
         {active && (
