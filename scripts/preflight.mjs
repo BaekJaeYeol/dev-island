@@ -8,6 +8,7 @@ const required = [
   "src/projects.ts",
   "src/world-config.mjs",
   "src/World.tsx",
+  "src/PlaceIcon.tsx",
   "src/places.mjs",
   "src/places.d.mts",
 ];

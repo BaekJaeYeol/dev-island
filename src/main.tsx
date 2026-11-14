@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import { createRoot } from "react-dom/client";
 import { places } from "./places.mjs";
+import { PlaceIcon } from "./PlaceIcon";
 import { projects } from "./projects";
 import "./style.css";
 const World = lazy(() => import("./World"));
@@ -30,6 +31,7 @@ function App() {
   const [selected, setSelected] = useState<string | null>(null);
   const [reset, setReset] = useState(0);
   const [night, setNight] = useState(false);
+  const [unavailable, setUnavailable] = useState(false);
   const [mode, setMode] = useState<"3d" | "2d">(() => {
     try {
       return document.createElement("canvas").getContext("webgl2")
@@ -43,7 +45,10 @@ function App() {
   const [reducedMotion] = useState(
     () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
   );
-  const onUnavailable = useCallback(() => setMode("2d"), []);
+  const onUnavailable = useCallback(() => {
+    setUnavailable(true);
+    setMode("2d");
+  }, []);
   useEffect(() => {
     const el = dialog.current;
     if (!el) return;
@@ -55,13 +60,13 @@ function App() {
   }, [selected]);
   const active = places.find((p) => p.id === selected);
   return (
-    <>
+    <div className="app" data-theme={night ? "night" : "day"}>
       <header>
         <div className="brand">
           ◈ DEV<span>ISLAND</span>
           <small>INTERACTIVE PORTFOLIO</small>
         </div>
-        <nav>
+        <nav aria-label="포트폴리오 메뉴">
           {places.map((p) => (
             <button
               key={p.id}
@@ -81,9 +86,11 @@ function App() {
           GitHub ↗
         </a>
       </header>
-      <main>
+      <main id="main-content">
         <section className="intro">
-          <div className="eyebrow">WELCOME TO MY WORLD</div>
+          <div className="eyebrow">
+            <span className="status-dot" /> BAEK JAEYEOL · DEVELOPER
+          </div>
           <h1>
             Explore my
             <br />
@@ -95,68 +102,106 @@ function App() {
             건물을 클릭해 프로젝트와 경험을 둘러보세요.
           </p>
           <button className="primary" onClick={() => setSelected("projects")}>
-            Explore projects →
+            프로젝트 둘러보기 <span aria-hidden="true">↗</span>
           </button>
           <button
             className="secondary"
-            onClick={() => setMode(mode === "3d" ? "2d" : "3d")}
+            onClick={() => {
+              setUnavailable(false);
+              setMode(mode === "3d" ? "2d" : "3d");
+            }}
           >
             {mode === "3d" ? "2D 보기" : "3D 보기"}
           </button>
+          <div className="intro-caption">
+            설계하고, 만들고, 검증하는 과정의 기록.
+          </div>
         </section>
-        <section className="scene" aria-label="3D 미니어처 월드">
-          {mode === "3d" ? (
-            <ErrorBoundary key={mode} onError={() => setMode("2d")}>
-              <Suspense fallback={<p>3D 로딩 중...</p>}>
-                <World
-                  select={setSelected}
-                  reset={reset}
-                  selected={selected}
-                  night={night}
-                  reducedMotion={reducedMotion}
-                  onUnavailable={onUnavailable}
-                />
-              </Suspense>
-            </ErrorBoundary>
-          ) : (
-            <div className="grid">
-              {places.map((p) => (
-                <button
-                  key={p.id}
-                  onClick={() => setSelected(p.id)}
-                  style={{ borderTop: "6px solid " + p.color }}
+        <section
+          data-mode={mode}
+          className="world-panel"
+          aria-label="인터랙티브 포트폴리오"
+        >
+          <div className="world-heading">
+            <span>THE ISLAND</span>
+            <span>{mode === "3d" ? "3D 탐색" : "2D 탐색"}</span>
+          </div>
+          <div className="scene" aria-label="미니어처 월드">
+            {mode === "3d" ? (
+              <ErrorBoundary key={mode} onError={onUnavailable}>
+                <Suspense
+                  fallback={
+                    <div className="scene-loading" role="status">
+                      섬을 준비하고 있어요…
+                    </div>
+                  }
                 >
-                  <strong>{p.name}</strong>
-                  <small>{p.subtitle}</small>
-                </button>
-              ))}
+                  <World
+                    select={setSelected}
+                    reset={reset}
+                    selected={selected}
+                    night={night}
+                    reducedMotion={reducedMotion}
+                    onUnavailable={onUnavailable}
+                  />
+                </Suspense>
+              </ErrorBoundary>
+            ) : (
+              <div className="grid">
+                {places.map((p) => (
+                  <button
+                    key={p.id}
+                    onClick={() => setSelected(p.id)}
+                    style={{ borderTop: "6px solid " + p.color }}
+                  >
+                    <PlaceIcon place={p} />
+                    <span className="place-category">{p.subtitle}</span>
+                    <strong>{p.name}</strong>
+                    <span className="card-arrow" aria-hidden="true">
+                      ↗
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="world-bottom">
+            <div className="hint">
+              {mode === "3d"
+                ? "드래그 회전 · 스크롤 확대 · 건물 클릭"
+                : "카드를 선택해 프로젝트와 경험을 둘러보세요"}
             </div>
+            <div className="world-actions">
+              <button
+                disabled={mode === "2d"}
+                aria-pressed={night}
+                onClick={() => setNight((v) => !v)}
+              >
+                {night ? "☀ 낮 모드" : "☾ 밤 모드"}
+              </button>
+              <button
+                onClick={() => {
+                  setSelected(null);
+                  setReset((x) => x + 1);
+                }}
+              >
+                ↻ 처음 시점
+              </button>
+            </div>
+          </div>
+          {mode === "2d" && (
+            <p className="view-note" role="status">
+              {unavailable
+                ? "3D 화면을 표시할 수 없어 2D로 전환했어요."
+                : "2D에서도 모든 프로젝트와 경험을 둘러볼 수 있어요."}
+            </p>
           )}
         </section>
-        <div className="hint">
-          {mode === "3d"
-            ? "드래그 회전 · 스크롤 확대 · 건물 클릭"
-            : "카드를 선택해 프로젝트와 경험을 둘러보세요"}
-        </div>
-        <div className="world-actions">
-          <button
-            disabled={mode === "2d"}
-            aria-pressed={night}
-            onClick={() => setNight((v) => !v)}
-          >
-            {night ? "☀ 낮 모드" : "☾ 밤 모드"}
-          </button>
-          <button
-            onClick={() => {
-              setSelected(null);
-              setReset((x) => x + 1);
-            }}
-          >
-            ↻ Reset view
-          </button>
-        </div>
       </main>
-      <footer>© 2026 DEV ISLAND</footer>
+      <footer>
+        <span>© 2026 DEV ISLAND · 백재열</span>
+        <span>작은 섬, 계속 자라는 이야기.</span>
+      </footer>
       <dialog
         ref={dialog}
         aria-labelledby="place-title"
@@ -177,7 +222,7 @@ function App() {
             </button>
             <div className="eyebrow">{active.subtitle.toUpperCase()}</div>
             <div className="illustration" style={{ background: active.color }}>
-              ◈ {active.subtitle}
+              <PlaceIcon place={active} />
             </div>
             <h2 id="place-title">{active.name}</h2>
             <p>{active.description}</p>
@@ -226,7 +271,7 @@ function App() {
           </>
         )}
       </dialog>
-    </>
+    </div>
   );
 }
 createRoot(document.getElementById("root")!).render(

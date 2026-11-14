@@ -30,6 +30,17 @@ npm run dev
 - 네이티브 dialog로 상세 화면 키보드 포커스 제한 및 Escape 닫기
 - 모션 줄이기 설정 시 섬 부유와 카메라 이동 애니메이션 생략
 
+- 소개·탐색 영역을 분리한 반응형 레이아웃과 자체 SVG 건물 안내 그림
+- 창문·출입문·등대·산책로·연못을 추가한 3D 장면
+
+## 화면 확인
+
+아래 캡처는 WebGL 미지원 환경의 **2D 대체 화면**입니다. 실제 3D 렌더링 검증과 구분합니다.
+
+![데스크톱 2D 화면](docs/screenshots/desktop-2d.jpg)
+
+[390px 모바일 화면](docs/screenshots/mobile-390.jpg)
+
 실행 결과와 미확인 항목은 [검증 기록](VALIDATION.md)을 참고하세요. GitHub Actions 실행에는 사전 확인이 필요합니다.
 
 ## 저장소
