@@ -26,3 +26,7 @@ npm run dev
 
 ## 저장소
 https://github.com/BaekJaeYeol/dev-island
+
+## 작업 운영과 이어가기
+
+[프로젝트별 역할·진행·결정·검증 기준](docs/operations/workflow.md)에 원본과 후보 PR, 실제 다음 작업을 연결했습니다. 지침 적용과 앱 실행·운영 검증은 구분합니다.
