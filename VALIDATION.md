@@ -1,0 +1,67 @@
+# 후속 검증 — 배포 제외
+
+- 드래그 뒤 의도치 않은 건물 선택을 pointer delta 기준으로 차단. 단위 검사 포함 Node 테스트 6개 통과.
+- WebGL2 미지원 재시도는 큰 3D 번들을 요청하기 전에 안내. 2D에서도 야간 테마 사용 가능.
+- 모션 줄이기 설정 change listener, context loss listener cleanup 보완. 실제 GPU context loss 및 OS 설정 실시간 변경은 미검증.
+- 상세 창 여백 클릭 시 닫히던 문제를 실제 backdrop 경계 좌표 검사로 수정.
+- TypeScript/Vite 빌드 통과.
+- 브라우저에서 2D 야간 테마·즉시 오류 안내·상세 열기·창 내부 여백 클릭 유지·바깥 클릭 닫기·실행 버튼 포커스 복귀 확인.
+- docs/screenshots/accessibility-verified.jpg는 실제 2D 야간 화면.
+- GPU 렌더링·실제 OrbitControls 드래그 후 선택 억제는 별도 기기에서 확인 필요.
+- 운영 배포·GitHub Actions 실행 없음.
+
+---
+아래는 앞 단계 검증 기록입니다.
+
+# Dev Island 검증 기록 — 2026-11-14
+
+## 현재 구현
+- 기존 파스텔 Low Poly 방향과 다섯 섹션 유지.
+- 실제 절차적 장면 데이터로 필수 검사 변경. GLB 파일 다운로드 불필요.
+- 기본 화면과 3D 렌더러 분리, 외부 글꼴 요청 없는 HTML 이름표.
+- 소개 문구와 카드가 겹치던 데스크톱 레이아웃을 Grid로 수정.
+- 모바일에서 내용 높이에 맞게 2D 탐색 영역 확장. 카드와 영역 제목 겹침 수정.
+- 자체 SVG 건물 그림, 탐색 안내와 오류 복구 안내 추가.
+- 3D 건물 창문·출입문·등대 조명·산책로·광장·연못·바위 추가. GLB나 외부 아트 사용 없음.
+- 사용자 드래그 시 자동 카메라 포커스 중단, 모션 줄이기 설정 반영.
+- 네이티브 dialog, 2D 오류 대체 화면, package-lock 및 npm ci 실행 절차.
+
+## 로컬 검사
+- Node v24.22.1 / npm 11.9.0.
+- npm ci --ignore-scripts 성공 (이전 실행 기반 정리 단계). 의존성·잠금 파일은 그 이후 변경 없음.
+- npm run check: 필수 파일 11개, Node 테스트 5개, TypeScript 검사, Vite 빌드 통과.
+- git diff --check 통과.
+- npm audit --omit=dev: 알려진 운영용 의존성 취약점 0건 (이전 단계 검사). 코드 전반의 안전 보장을 의미하지 않음.
+- 빌드: 기본 JS 약 234 KB, 장면 JS 약 901 KB (gzip 약 244 KB). 큰 3D 청크 경고는 남아 있음. 기기 성능 미측정.
+
+## 실제 브라우저 확인
+관리형 미리보기 경로를 사용해 앞 단계의 로컬 연결 거부 문제를 해결했다. 새 브라우저나 GPU 설정 변경 없이 검증했다.
+
+| 항목 | 결과 |
+| --- | --- |
+| 데스크톱 화면 | 소개와 카드 겹침 수정 후 시각 확인 |
+| About / Projects / Skills / Experience / Contact | 각 버튼으로 해당 상세 창 열림, 닫기 확인 |
+| 프로젝트 상세 | 두 프로젝트 내용과 저장소 링크 표시 확인. 외부 링크 대상 서비스 로그인·내용 검증은 미실시 |
+| 키보드 | 상세 창 열기 시 닫기 버튼 포커스, Shift+Tab/Tab 후 창 내부 유지, Escape 닫기와 실행 버튼 포커스 복귀 확인 |
+| WebGL 미지원 상태 | 최초 2D 표시, 3D 보기 클릭 후 실패 안내와 2D 카드 복귀 확인 |
+| 390px 모바일 프레임 | 내용 너비 375px(스크롤바 제외), scrollWidth 375px. 가로 넘침 없음. 카드 제목과 상단 안내 겹침 없음. 프로젝트 상세 열기·닫기 확인 |
+| 320px 모바일 프레임 | 내용 너비 305px(스크롤바 제외), scrollWidth 305px. 가로 넘침 없음. 제목·카드 간격 및 시각 확인 |
+
+모바일 확인은 데스크톱 브라우저 안의 지정 너비 iframe 기반이며 실제 Android 기기 터치·브라우저 UI 검증을 대신하지 않는다.
+
+## 화면 근거
+- docs/screenshots/desktop-2d.jpg: 전체 데스크톱 화면
+- docs/screenshots/mobile-390.jpg: 390px 너비 프레임의 상단 화면
+
+둘 다 실제 브라우저의 2D 대체 화면 캡처이며 3D 렌더 이미지가 아니다.
+
+## 남은 검증과 다음 단계
+- 검증 브라우저는 WebGL2 컨텍스트를 만들 수 없어 실제 3D 메시·재질·카메라·낮/밤 모습은 미검증.
+- 실행 중 context loss와 GPU 지원 기기에서의 렌더 오류 복구도 별도 검증 필요. 이번 검증은 초기 3D 생성 실패 경로에 해당.
+- 실제 Windows/Android WebGL 지원 브라우저에서 건물 선택, 드래그·확대·초기화, 밤 조명과 성능 확인.
+- 운영 배포 미실시. 기존 Vercel 연결 및 배포 URL 미확인.
+- GitHub Actions는 실행하지 않으며 커밋의 [skip ci]로 자동 실행을 건너뜀.
+
+## 참고
+- https://r3f.docs.pmnd.rs/api/canvas — Canvas fallback과 오류 경계
+- https://www.w3.org/WAI/WCAG22/Techniques/html/H102 — 네이티브 dialog 키보드 처리
