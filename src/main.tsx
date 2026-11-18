@@ -197,8 +197,8 @@ function App() {
       <dialog
         ref={dialog}
         aria-labelledby="place-title"
-        onCancel={() => setSelected(null)}
-        onClose={() => setSelected(null)}
+        onCancel={(event) => { event.preventDefault(); setSelected(null); }}
+        onClose={(event) => { if (!event.currentTarget.open) setSelected(null); }}
         onClick={(e) => {
           if(e.target!==e.currentTarget)return;
           const bounds=e.currentTarget.getBoundingClientRect();
@@ -273,3 +273,4 @@ createRoot(document.getElementById("root")!).render(
     <App />
   </React.StrictMode>,
 );
+

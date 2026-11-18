@@ -43,7 +43,14 @@ npm run dev
 
 [390px 모바일 화면](docs/screenshots/mobile-390.jpg)
 
-실행 결과와 미확인 항목은 [검증 기록](VALIDATION.md)을 참고하세요. GitHub Actions 실행에는 사전 확인이 필요합니다.
+2026-11-18에 정상 WebGL의 강제 2D 전환과 연속 dialog close 경합을 수정했습니다. 마우스·키보드·터치·컨텍스트 손실/복구를 포함한 브라우저 검사 5개가 통과했습니다. [최신 검증 기록](docs/VALIDATION_20261118.md) · [이전 검증 기록](VALIDATION.md). GitHub Actions 실행에는 사전 확인이 필요합니다.
 
 ## 저장소
 https://github.com/BaekJaeYeol/dev-island
+
+
+## Windows 실행과 브라우저 검사
+
+Node.js 22 이상에서 루트의 `Run-Windows.cmd`로 설치·빌드 후 로컬 미리보기를 열 수 있습니다. 스크립트의 Windows 직접 실행은 미검증입니다.
+
+브라우저 테스트: `npx playwright install chromium` 후 `npm run test:e2e`. PC 프로젝트는 먼저 `cd web`을 실행합니다.

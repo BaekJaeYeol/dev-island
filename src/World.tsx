@@ -5,10 +5,6 @@ import { Vector3 } from "three";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { cameraForBuilding, HOME_CAMERA, isSelectionGesture } from "./world-config.mjs";
 import { places, type Place } from "./places.mjs";
-function Unavailable({ onUnavailable }: { onUnavailable: () => void }) {
-  useEffect(onUnavailable, [onUnavailable]);
-  return null;
-}
 function Building({
   p,
   select,
@@ -166,8 +162,8 @@ function CameraRig({
     const k = reducedMotion ? 1 : 1 - Math.exp(-3 * Math.min(delta, 0.1));
     if (focusing.current && controls.current) {
       controls.current.target.lerp(target.current, k);
-      controls.current.update();
       camera.position.lerp(position.current, k);
+      controls.current.update();
       if (camera.position.distanceTo(position.current) < 0.04)
         focusing.current = false;
     }
@@ -205,7 +201,7 @@ export default function World({
   useEffect(()=>()=>cleanup.current(),[]);
   return (
     <Canvas
-      fallback={<Unavailable onUnavailable={onUnavailable} />}
+      fallback={<span>3D 화면을 지원하는 브라우저가 필요합니다.</span>}
       onCreated={({ gl }) => {
         const canvas=gl.domElement;
         const lost=(event:Event)=>{event.preventDefault();onUnavailable()};
@@ -308,3 +304,4 @@ export default function World({
     </Canvas>
   );
 }
+
