@@ -54,3 +54,7 @@ https://github.com/BaekJaeYeol/dev-island
 Node.js 22 이상에서 루트의 `Run-Windows.cmd`로 설치·빌드 후 로컬 미리보기를 열 수 있습니다. 스크립트의 Windows 직접 실행은 미검증입니다.
 
 브라우저 테스트: `npx playwright install chromium` 후 `npm run test:e2e`. PC 프로젝트는 먼저 `cd web`을 실행합니다.
+
+## 작업 운영과 이어가기
+
+[프로젝트별 역할·진행·결정·검증 기준](docs/operations/workflow.md)에 원본과 후보 PR, 실제 다음 작업을 연결했습니다. 지침 적용과 앱 실행·운영 검증은 구분합니다.
